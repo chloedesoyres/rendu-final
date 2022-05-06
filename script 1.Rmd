@@ -1,0 +1,21 @@
+---
+title: "rendu final"
+author: "momo"
+date: "5/3/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Présentation des données: vote et carroyage
+```{r}
+library(sf)
+st_read("vote.gpkg")
+data1<-st_read("vote.gpkg")
+str(data1)
+data2<-st_read("insee.gpkg")
+str(data2)
+```
+Je fais tourner la librairie sf et j'utilise la commande st_read, ce qui me permet de voir la structure du fichier vote.gpkg. J'applique la même méthode pour observer la structure de insee.gpkg et ainsi présenter les données sur le vote et le carroyage.

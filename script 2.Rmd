@@ -1,0 +1,92 @@
+---
+title: "script 2"
+author: "momo"
+date: "5/6/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Carte d'une variable de carroyage
+```{r}
+library(sf)
+library(mapsf)
+```
+
+```{r}
+library(leaflet)
+leaflet()%>%addTiles()
+```
+```{r}
+m<-leaflet()
+m<-addTiles(m)
+m
+```
+```{r}
+library(sf)
+data2<-st_read("documents/insee.gpkg","bondy")
+```
+Je charge le fichier insee.gpkg et je fais apparaître la couche bondy.
+
+```{r}
+data2<-st_transform(data2,4326)
+data2$Men_pauv
+```
+```{r}
+pal<-colorNumeric(
+  palette = "YIOrRd",
+  domain = data2$Men_pauv
+)
+leaflet(data2) %>%
+  addPolygons(color = "#444444", weight = 1, smoothFactor = 0.5,
+    opacity = 1.0, fillOpacity = 0.5,
+    fillColor = ~colorQuantile("YlOrRd",Men_pauv)(Men_pauv),
+    highlightOptions = highlightOptions(color = "white", weight = 2,
+      bringToFront = TRUE)) %>% addLegend("bottomright", pal = pal, values = ~Men_pauv,
+    title = "Ménages pauvres",
+    opacity = 1
+  ) %>% addTiles()
+```
+J'affiche les données sur la variable des ménages pauvres pour identifier la répartition dans l'espace de ces ménages.
+Les commandes ci-dessus permettent d'afficher le carroyage de ménages et de leur attribuer une couleur selon la pauvreté de chaque zone.
+
+
+#Carte de vote
+```{r}
+library(sf)
+library(mapsf)
+data<-st_read("vote.gpkg","jointure")
+```
+```{r}
+apply(data[,14:18,drop=T],2,sum)
+summary(data[,14:15,drop=T])
+data<-data[,15]
+names(data)[1]<-c("BADOUX")
+palette <- heat.colors(5, rev = T)
+seuils <- c(85, 100, 125, 150, 175, 230)
+str(data)
+png("resultBADOUX.png", width = 4000, height = 4000, res = 400)
+mf_choro(data,  var = "BADOUX", breaks = seuils, pal = palette,border = NA, leg_pos = "n")
+mf_label(data,"BADOUX")
+mf_inset_on(data, pos = "topright")
+par(mar = c(2,2,2,2))
+hist(data$BADOUX, border = NA, right = F, col=palette, main = "", xlab = "", ylab="")
+mf_inset_off()
+dev.off()
+```
+Cette carte de vote sur les votes pour la candidate Badoux nous permet de constater que l'espace où ses électeurs sont les plus concentrés est l'est de Bondy.
+
+```{r}
+library("png")
+img1<-readPNG("resultBADOUX.png")
+display<-function(...){
+  imageList<-list(...) ;   totalWidth<-0 ;   maxHeight<-0 ;   
+for (img in imageList){    if(is.character(img)) img<-readPNG(img) ;  dimg<-dim(img) ;  totalWidth<-totalWidth+dimg[2] ;   maxHeight<-max(maxHeight,dimg[1])  }
+  par(mar=c(0,0,0,0)) ;   plot(c(0,totalWidth),c(0,maxHeight),type="n",asp=1,xaxt="n",yaxt="n",xlab="x",ylab="y") ;   offset<-0 ; 
+  for (img in imageList){    dimg<-dim(img) ;    rasterImage(img,offset,0,offset+dimg[2],dimg[1])
+    offset<-offset+dimg[2]  }}
+display(img1)
+```
+
