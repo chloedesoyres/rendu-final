@@ -1,0 +1,46 @@
+---
+title: "Untitled"
+author: "momo"
+date: "5/9/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#Affichage des bureaux de vote
+```{r}
+data <- read.csv("documents/bondyElection.csv", fileEncoding = "UTF-8", dec = ",")
+zone$Layer
+data$Bureau.de.vote
+```
+```{r}
+dataSel <- data [c(1:32),]
+zone$cle <- substring (zone$Layer,9,11)
+dataSel$cle <- substring(dataSel$Bureau.de.vote, 3,5 )
+dataSel$cle <- as.integer(dataSel$cle)
+zone$cle <- as.integer(zone$cle)
+length(zone$cle) == length(data$cle)
+```
+```{r}
+jointure <- merge(zone, dataSel, by = "cle")
+st_write(jointure, "documents/vote.gpkg", "jointure", delete_layer = T)
+```
+#carte des résultats
+```{r}
+library(sf)
+library(mapsf)
+jointure <- st_read("documents/vote.gpkg", "jointure", quiet = T)
+names(jointure)
+```
+#Extraction des noms des candidats
+```{r}
+names(jointure)[14:18] <- c("THOMASSIN", "HERVE", "AMMOURI", "DUGUET", "BADOUX")
+names (data) [1:5] <- c("THOMASSIN", "HERVE","AMMOURI","DUGUET","BADOUX")
+palette <- terrain.colors(5, rev = T)
+seuils <- c("THOMASSIN","HERVE","AMMOURI","DUGUET","BADOUX")
+png("img/resultats", width = 4000, height = 4000, res = 400)
+```
+J'ai essayé de convertir les caractères en données numériques afin de leur attribuer des valeurs qui auraient permis de créer une carte avec, pour chaque candidat, une couleur particulière dans le carroyage. Je n'ai pas réussi à utiliser cette commande, ce qui ne me permet donc pas de réaliser la carte en carroyage...
+
